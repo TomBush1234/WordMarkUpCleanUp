@@ -1,0 +1,70 @@
+Sub ConvertMarkdownToWord()
+
+    Dim rng As Range
+    Set rng = ActiveDocument.Content
+
+    rng.Find.ClearFormatting
+    rng.Find.Replacement.ClearFormatting
+
+    ' Convert bold text
+    rng.Find.Replacement.Font.Bold = True
+    With rng.Find
+        .Text = "\*\*([!^13]@)\*\*"
+        .Replacement.Text = "\1"
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = True
+        .MatchWildcards = True
+    End With
+    rng.Find.Execute Replace:=wdReplaceAll
+
+    ' Reset formatting for subsequent replacements
+    rng.Find.ClearFormatting
+    rng.Find.Replacement.ClearFormatting
+
+    ' Convert italic text
+    rng.Find.Replacement.Font.Italic = True
+    With rng.Find
+        .Text = "\_([!^13]@)\_"
+        .Replacement.Text = "\1"
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = True
+        .MatchWildcards = True
+    End With
+    rng.Find.Execute Replace:=wdReplaceAll
+
+    ' Reset formatting for subsequent replacements
+    rng.Find.ClearFormatting
+    rng.Find.Replacement.ClearFormatting
+
+    ' Convert headers
+    Dim i As Integer
+    For i = 1 To 3
+        rng.Find.Replacement.Font.Size = 14 + (3 - i) * 2
+        rng.Find.Replacement.Font.Bold = True
+        With rng.Find
+            .Text = String(i, "#") & " ([!^13]@)"
+            .Replacement.Text = "\1"
+            .Forward = True
+            .Wrap = wdFindContinue
+            .Format = True
+            .MatchWildcards = True
+        End With
+        rng.Find.Execute Replace:=wdReplaceAll
+        ' Reset formatting for subsequent replacements
+        rng.Find.ClearFormatting
+        rng.Find.Replacement.ClearFormatting
+    Next i
+
+    ' Convert bulleted lists
+    With rng.Find
+        .Text = "\* ([!^13]@)"
+        .Replacement.Text = Chr(149) & " \1"
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchWildcards = True
+    End With
+    rng.Find.Execute Replace:=wdReplaceAll
+End Sub
